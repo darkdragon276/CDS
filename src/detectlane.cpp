@@ -11,8 +11,10 @@ int DetectLane::BIRDVIEW_HEIGHT = 320;
 int DetectLane::VERTICAL = 0;
 int DetectLane::HORIZONTAL = 1;
 Point DetectLane::null = Point();
+
 int DetectLane::LEFT_LANE = 2;
 int DetectLane::RIGHT_LANE = 3;
+
 int DetectLane::var_left = 0;
 int DetectLane::var_right = 0;
 // Point DetectLane::mass_road_static = Point( BIRDVIEW_WIDTH/2, BIRDVIEW_HEIGHT/2 );
@@ -120,11 +122,11 @@ Mat DetectLane::sobelfilter( const Mat& img_gray)
 void DetectLane::fillLane(Mat &src)
 {
     vector<Vec4i> lines;
-    HoughLinesP(src, lines, 1, CV_PI/180, 1);
+    HoughLinesP(src, lines, 1, CV_PI/180, 1, 4, 4);
     for( size_t i = 0; i < lines.size(); i++ )
     {
         Vec4i l = lines[i];
-        line(src, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(255), 3, LINE_AA);
+        line(src, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(255), 1, LINE_AA);
     }
 }
 
@@ -435,6 +437,12 @@ Point DetectLane::MassOfRoad(const Mat &src_RGB)
     cvtColor(src_RGB, src_HSV, COLOR_BGR2HSV);
     inRange(src_HSV, HSV_thresh_min, HSV_thresh_max, road_thresh);
     bitwise_not(road_thresh,road_thresh_inv);
+    Mat element = getStructuringElement( MORPH_RECT, Size(7, 7) );
+    erode(road_thresh_inv, road_thresh_inv, element );
+    threshold(road_thresh_inv, road_thresh_inv, 150, 255,THRESH_BINARY);
+    erode(road_thresh_inv, road_thresh_inv, element );
+    threshold(road_thresh_inv, road_thresh_inv, 150, 255,THRESH_BINARY);
+    
     /// Find contours
     vector<vector<Point> > contours; //Tao 1 vector 2 chieu voi moi phan tu la Point
     vector<Vec4i> hierarchy;
@@ -445,10 +453,11 @@ Point DetectLane::MassOfRoad(const Mat &src_RGB)
     Mat drawing = Mat::zeros( road_thresh.size(), CV_8UC3 );
     for( int i = 0; i< contours.size(); i++ )
     {
-       drawContours( drawing, contours, i, Scalar( 0, 255, 0), 2, 8, hierarchy, 0, Point() );
+       drawContours( drawing, contours, i, Scalar( 0, 255, 0) );
        circle( drawing, mc_hsv, 1, Scalar (0,50,128), -1, 8, 0 );
     }
-    imshow("Debug", drawing);
+    imshow("Debug", road_thresh_inv);
+    imshow( "drawing", drawing );
     return mc_hsv;
 }
 

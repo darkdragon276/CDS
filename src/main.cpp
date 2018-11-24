@@ -11,22 +11,13 @@
 
 bool STREAM = false;
 
-VideoCapture capture("/home/nam/Desktop/nam.avi");
+VideoCapture capture("/home/nam/CDS/CDS_data/live_cut.avi");
 VideoWriter out_capture;
 
 DetectLane *detect;
 CarControl *car;
 int skipFrame = 1;
 static int flag =2;
-// void config_video ( void )
-// {
-//     const string file_name = "~/Desktop/video.avi";
-//     int codec =  VideoWriter::fourcc('M','J','P','G');
-//     double fps = 25;
-//     Size frame_size = Size( 320, 240 );
-//     bool is_Color = true;
-//     out_capture = VideoWriter( file_name, codec, fps, frame_size  , is_Color);
-// }
 void sign_callback(const std_msgs::Float32::ConstPtr& msg) {
     if(msg->data == 1)
     {
@@ -47,8 +38,6 @@ void sign_callback(const std_msgs::Float32::ConstPtr& msg) {
     }
 
 }
-
-
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
     static long cnt=0;
@@ -99,7 +88,7 @@ void videoProcess()
         }
         
         imshow("View", src);
-        if( frame_counter%5 == 0)
+        if( frame_counter%1 == 0)
         {
            detect->update(src); 
         }
